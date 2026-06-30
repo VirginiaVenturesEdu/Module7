@@ -22,6 +22,7 @@ import {
   PanelDocument,
   Interactable,
   Vector3,
+  Quaternion,
   Box3,
 } from "@iwsdk/core";
 
@@ -239,6 +240,56 @@ function refreshHUD() {
   if (hudGrowthFill) hudGrowthFill.style.width = scoreGrowth + "%";
   if (hudSecurityFill) hudSecurityFill.style.width = scoreSecurity + "%";
   if (hudSmartsFill) hudSmartsFill.style.width = scoreSmarts + "%";
+  updateScoreboard();
+}
+
+// ============================================================================
+// 3D SCOREBOARD (the headset dashboard)
+// The HUD above is a plain DOM overlay: the browser draws it, but an immersive
+// headset only renders the WebGL scene, so the DOM dashboard is invisible in VR.
+// This mirrors the same money + three meters onto a uikit panel (ui/scoreboard)
+// that softly follows the player's view. updateScoreboard() writes the live
+// values; the follow loop in World.create keeps it in front of the player.
+// ============================================================================
+let sbDoc: any = null;
+let sbMoneyEl: any = null;
+let sbGrowthVal: any = null;
+let sbSecurityVal: any = null;
+let sbSmartsVal: any = null;
+let sbGrowthFill: any = null;
+let sbSecurityFill: any = null;
+let sbSmartsFill: any = null;
+const METER_TRACK_WIDTH = 24; // MUST match .track width in ui/scoreboard.uikitml
+// Last values pushed to the panel, so setProperties only runs on an actual change.
+let sbLastMoney = Number.NaN;
+let sbLastGrowth = Number.NaN;
+let sbLastSecurity = Number.NaN;
+let sbLastSmarts = Number.NaN;
+
+function updateScoreboard() {
+  if (!sbDoc) return;
+  if (currentMoney !== sbLastMoney) {
+    sbMoneyEl?.setProperties({ text: "$" + currentMoney });
+    sbLastMoney = currentMoney;
+  }
+  const g = Math.round(scoreGrowth);
+  if (g !== sbLastGrowth) {
+    sbGrowthVal?.setProperties({ text: String(g) });
+    sbGrowthFill?.setProperties({ width: (g / 100) * METER_TRACK_WIDTH });
+    sbLastGrowth = g;
+  }
+  const s = Math.round(scoreSecurity);
+  if (s !== sbLastSecurity) {
+    sbSecurityVal?.setProperties({ text: String(s) });
+    sbSecurityFill?.setProperties({ width: (s / 100) * METER_TRACK_WIDTH });
+    sbLastSecurity = s;
+  }
+  const m = Math.round(scoreSmarts);
+  if (m !== sbLastSmarts) {
+    sbSmartsVal?.setProperties({ text: String(m) });
+    sbSmartsFill?.setProperties({ width: (m / 100) * METER_TRACK_WIDTH });
+    sbLastSmarts = m;
+  }
 }
 
 // A quick pop on a number that just changed.
@@ -659,6 +710,57 @@ World.create(document.getElementById("scene-container") as HTMLDivElement, {
   // Build the HUD and show the opening goal.
   createHUD();
   setObjective("Look around by holding the right mouse button, and walk with W A S D.");
+
+  // --------------------------------------------------------------------------
+  // 3D SCOREBOARD (the headset dashboard)
+  // The top-left HUD is a DOM overlay, which a headset cannot render. This panel
+  // mirrors money + the three meters onto a card that softly follows the player's
+  // gaze, so the dashboard stays visible in VR. It is hidden in the browser (the
+  // DOM HUD already covers that) and shown whenever a headset is presenting.
+  // --------------------------------------------------------------------------
+  const scoreboardPanel = world
+    .createTransformEntity()
+    .addComponent(PanelUI, { config: "./ui/scoreboard.json", maxWidth: 0.8, maxHeight: 1.0 });
+  scoreboardPanel.object3D!.visible = false;
+
+  whenPanelReady(scoreboardPanel, function (doc) {
+    sbDoc = doc;
+    sbMoneyEl = doc.getElementById("money-total");
+    sbGrowthVal = doc.getElementById("val-growth");
+    sbSecurityVal = doc.getElementById("val-security");
+    sbSmartsVal = doc.getElementById("val-smarts");
+    sbGrowthFill = doc.getElementById("fill-growth");
+    sbSecurityFill = doc.getElementById("fill-security");
+    sbSmartsFill = doc.getElementById("fill-smarts");
+    sbLastMoney = sbLastGrowth = sbLastSecurity = sbLastSmarts = Number.NaN; // force first write
+    updateScoreboard();
+  });
+
+  // Only show the floating scoreboard in a headset; the DOM HUD owns the browser.
+  world.visibilityState.subscribe(function (state) {
+    scoreboardPanel.object3D!.visible = state !== VisibilityState.NonImmersive;
+  });
+
+  // Keep the scoreboard parked just below and left of the eye line, billboarded
+  // to face the player. setInterval (not rAF, which pauses in a headset), and all
+  // temporaries are allocated once so the loop makes no per-frame garbage.
+  const _sbPos = new Vector3();
+  const _sbQuat = new Quaternion();
+  const _sbOffset = new Vector3();
+  const SB_OFFSET = new Vector3(-0.52, -0.40, -1.25); // left, down, forward of the eye
+  function scoreboardFollowLoop() {
+    const o3d = scoreboardPanel.object3D;
+    if (!o3d || !o3d.visible) return;
+    const cam: any = world.camera;
+    cam.getWorldQuaternion(_sbQuat);
+    _sbOffset.copy(SB_OFFSET).applyQuaternion(_sbQuat);
+    cam.getWorldPosition(_sbPos).add(_sbOffset);
+    o3d.position.copy(_sbPos);
+    o3d.quaternion.copy(_sbQuat); // face the player (panel front is +Z)
+    updateScoreboard();
+    applyPanelOnTop(scoreboardPanel);
+  }
+  setInterval(scoreboardFollowLoop, 33);
 
   // Start the flow at Setup.
   // ==========================================================================
