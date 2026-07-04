@@ -36,6 +36,7 @@ export function setupStage1(ctx: Ctx) {
     radius: 3.0,
     objectiveAfter: "Now head to the Bank to make your money plan.",
     beaconAfter: "bank",
+    personalize: true, // Gus greets the explorer by name on their first question
     answers: {
       a: { best: true, reply: "Exactly right!" },
       b: { best: false, reply: "Not quite. Spending every dollar right away leaves nothing for later or for a surprise." },

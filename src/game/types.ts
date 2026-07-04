@@ -29,6 +29,8 @@ export type Phase = "setup" | "stage1" | "stage2" | "stage3" | "report";
 export interface Character {
   id: string;
   name: string;
+  trait: string; // a verb phrase Gus references, e.g. "love gadgets"
+  accent: string; // the HUD/report accent color for this explorer
 }
 
 // Stage 2 invest plans: how the paycheck is split, and how each meter moves.

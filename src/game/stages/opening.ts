@@ -7,7 +7,7 @@
 import { Interactable, PanelUI } from "@iwsdk/core";
 import { COLOR, setChosenCharacter } from "../state";
 import { showPhase, registerPhasePanel } from "../phase";
-import { setObjective } from "../hud";
+import { setCharacter, setObjective } from "../hud";
 import { sfxClick } from "../../sfx";
 import type { Ctx } from "../context";
 import type { Character, PanelDoc } from "../types";
@@ -15,10 +15,10 @@ import type { Character, PanelDoc } from "../types";
 // The four explorers. Only the name is used in code (for the report greeting);
 // the words on the cards live in ui/setup.uikitml.
 const CHARACTERS: Character[] = [
-  { id: "ada", name: "Ada" },
-  { id: "leo", name: "Leo" },
-  { id: "mia", name: "Mia" },
-  { id: "sam", name: "Sam" },
+  { id: "ada", name: "Ada", trait: "love gadgets", accent: "#1c8ca8" },
+  { id: "leo", name: "Leo", trait: "love sports", accent: "#e0662a" },
+  { id: "mia", name: "Mia", trait: "love art", accent: "#9b59b6" },
+  { id: "sam", name: "Sam", trait: "love animals", accent: "#3f9b4a" },
 ];
 
 const WELCOME_STEPS = 3;
@@ -129,6 +129,7 @@ export function setupOpening(ctx: Ctx): { start: () => void } {
     function selectCharacter(ch: Character) {
       chosen = ch;
       setChosenCharacter(ch);
+      setCharacter(ch.name, ch.accent); // tint the HUD to the explorer's color
       for (const c of CHARACTERS) {
         const card = cards[c.id];
         if (card) card.setProperties({ borderColor: c.id === ch.id ? GOLD : NAVY });

@@ -31,6 +31,7 @@
   .next-label { font-size: 4.4; font-weight: bold; color: #1F3A5F; word-break: keep-all; }
   .debrief-intro { font-size: 3.8; font-weight: bold; color: #1F3A5F; text-align: center; margin-top: 2; }
   .debrief-q { font-size: 3.6; color: #1F3A5F; text-align: left; width: 124; margin-top: 3; }
+  .replay-hint { font-size: 3.4; font-weight: bold; color: #8a6118; text-align: center; width: 124; margin-top: 4; }
   .play-again-button { display: flex; align-items: center; justify-content: center; margin-top: 5; padding-top: 3; padding-bottom: 3; padding-left: 9; padding-right: 9; background-color: #c8962a; border-radius: 4; cursor: pointer; }
   .play-again-label { font-size: 4.4; font-weight: bold; color: #1F3A5F; word-break: keep-all; }
 </style>
@@ -94,6 +95,7 @@
     <span class="debrief-q">1. How did your money grow or shrink across the three stages?</span>
     <span class="debrief-q">2. Describe a moment when an unexpected event changed your money.</span>
     <span class="debrief-q">3. Would you save, spend, or invest differently next time? Why?</span>
+    <span id="replay-hint" class="replay-hint">...</span>
     <div id="play-again-button" class="play-again-button">
       <span class="play-again-label">Play Again</span>
     </div>

@@ -7,7 +7,7 @@
 // ============================================================================
 
 import { Interactable, PanelUI } from "@iwsdk/core";
-import { getPhase, SMARTS_BEST, SMARTS_OK, updateScore } from "../state";
+import { getChosenCharacter, getPhase, SMARTS_BEST, SMARTS_OK, updateScore } from "../state";
 import { setObjective } from "../hud";
 import { sfxClick, sfxCoin } from "../../sfx";
 import { GUS_SPOT, setBeaconTarget } from "../../environment";
@@ -28,6 +28,7 @@ export interface GusQuestionOptions {
   objectiveAfter: string; // the goal line once Gus is done
   beaconAfter: "bank" | "business"; // which station beacon lights once Gus is done
   answers: { a: GusAnswer; b: GusAnswer; c: GusAnswer }; // per-answer replies
+  personalize?: boolean; // if set, Gus name-drops the explorer and their trait
 }
 
 export interface GusQuestion {
@@ -63,7 +64,13 @@ export function setupGusQuestion(ctx: Ctx, opts: GusQuestionOptions): GusQuestio
       answered = true;
       sfxCoin();
       updateScore("smarts", cfg.best ? SMARTS_BEST : SMARTS_OK);
-      replyText?.setProperties({ text: cfg.reply + " " + opts.lesson });
+      // The first time, Gus greets the explorer by name and nods to their trait.
+      let lead = "";
+      const character = getChosenCharacter();
+      if (opts.personalize && character) {
+        lead = character.name + ", I hear you " + character.trait + "! ";
+      }
+      replyText?.setProperties({ text: lead + cfg.reply + " " + opts.lesson });
       // The Smarts chip only shows when the best answer actually earned points.
       if (cfg.best) replyChip?.setProperties({ text: "+" + SMARTS_BEST + " Smarts", display: "flex" });
       else replyChip?.setProperties({ display: "none" });

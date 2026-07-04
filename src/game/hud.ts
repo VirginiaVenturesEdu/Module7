@@ -21,6 +21,19 @@ let hudSecurityFill: HTMLElement | null = null;
 let hudSmartsFill: HTMLElement | null = null;
 let hudStageChip: HTMLElement | null = null;
 let hudObjective: HTMLElement | null = null;
+let hudRoot: HTMLElement | null = null;
+let hudCharacter: HTMLElement | null = null;
+
+// Show the chosen explorer's name in their accent color, and tint the HUD
+// border to match, so the character pick is visible while you play.
+export function setCharacter(name: string, accent: string) {
+  if (hudCharacter) {
+    hudCharacter.textContent = "★ " + name;
+    hudCharacter.style.color = accent;
+    hudCharacter.style.display = "block";
+  }
+  if (hudRoot) hudRoot.style.borderColor = accent;
+}
 
 let moneyRowEl: HTMLElement | null = null;
 let moneyValueEl: HTMLElement | null = null;
@@ -207,6 +220,7 @@ export function initHud() {
   hud.style.fontSize = "14px";
   hud.style.boxShadow = "0 4px 14px rgba(31, 58, 95, 0.3)";
   hud.style.pointerEvents = "none";
+  hudRoot = hud;
 
   const header = document.createElement("div");
   header.style.display = "flex";
@@ -233,6 +247,13 @@ export function initHud() {
   header.appendChild(title);
   header.appendChild(hudStageChip);
   hud.appendChild(header);
+
+  hudCharacter = document.createElement("div");
+  hudCharacter.style.display = "none";
+  hudCharacter.style.fontWeight = "800";
+  hudCharacter.style.fontSize = "12px";
+  hudCharacter.style.marginBottom = "6px";
+  hud.appendChild(hudCharacter);
 
   hud.appendChild(buildMoneyRow());
 

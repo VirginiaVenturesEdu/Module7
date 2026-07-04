@@ -83,8 +83,22 @@ function exportSession(personality: string) {
   }
 }
 
+// Read the personality from the PREVIOUS session (saved last time), before this
+// run overwrites it, so the report can nudge the student to try something new.
+function readLastPersonality(): string {
+  try {
+    const raw = localStorage.getItem("moneyMoves.session");
+    if (!raw) return "";
+    const prev = JSON.parse(raw) as { personality?: string };
+    return prev.personality || "";
+  } catch {
+    return "";
+  }
+}
+
 export function setupReport(ctx: Ctx): { showReport: () => void } {
   const { world, panels } = ctx;
+  const lastPersonality = readLastPersonality(); // captured before we export this run
 
   const panel = world
     .createTransformEntity()
@@ -143,8 +157,17 @@ export function setupReport(ctx: Ctx): { showReport: () => void } {
     const name = character ? character.name : "explorer";
 
     if (doc) {
-      doc.getElementById("greeting")?.setProperties({ text: "Great job, " + name + "!" });
+      doc.getElementById("greeting")?.setProperties({
+        text: "Great job, " + name + "!",
+        ...(character ? { color: character.accent } : {}),
+      });
       doc.getElementById("personality-name")?.setProperties({ text: p.name });
+
+      // Replay nudge: name last time's result (if any) and suggest a new tack.
+      const hint = lastPersonality
+        ? "Last time you were a " + lastPersonality + ". What happens if you try a different strategy this time?"
+        : "Want to try again? See what happens if you spread your money out next time!";
+      doc.getElementById("replay-hint")?.setProperties({ text: hint });
       doc.getElementById("personality-blurb")?.setProperties({ text: p.blurb });
       doc.getElementById("value-growth")?.setProperties({ text: String(s.growth) });
       doc.getElementById("value-security")?.setProperties({ text: String(s.security) });
