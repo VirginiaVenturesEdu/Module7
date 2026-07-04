@@ -21,9 +21,9 @@ export const ECON = {
   INVEST_GOOD_MULTIPLIER: 1.4, // an investment that does well
   INVEST_BAD_MULTIPLIER: 0.7, // an investment that struggles
   INVEST_GOOD_PROBABILITY: 0.55, // chance an investment does well
-  BIG_DECISION_FUNDS: 200, // the Stage 3 money to spread around
   SURPRISE_EXPENSE: 30, // the unexpected cost in Stage 3
-  DIVERSIFY_MIN_CHANNELS: 3, // places you must use to count as spreading out
+  // (Stage 3's "money to spread" is now the carried balance, so the old fixed
+  // BIG_DECISION_FUNDS is gone — the amount comes from the student's real total.)
 };
 
 // Money Smarts awarded for Gus's quiz answers (shared by all three questions).

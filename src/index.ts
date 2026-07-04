@@ -48,7 +48,14 @@ World.create(document.getElementById("scene-container") as HTMLDivElement, {
     // useWorker is OFF on purpose: with it on the spawn would sit at the origin
     // and snap forward on the first keypress; on the main thread the initial
     // position applies immediately, and the scene is light so there is no cost.
-    locomotion: { useWorker: false, browserControls: true, initialPlayerPosition: [0, 0, 7] },
+    // comfortAssist adds a peripheral vignette while sliding in the headset,
+    // which cuts motion sickness for a classroom of first-time VR users.
+    locomotion: {
+      useWorker: false,
+      browserControls: true,
+      initialPlayerPosition: [0, 0, 7],
+      comfortAssistLevel: 0.7,
+    },
     grabbing: true,
     physics: true,
     sceneUnderstanding: false,
@@ -67,7 +74,10 @@ World.create(document.getElementById("scene-container") as HTMLDivElement, {
   // In the headset the headset owns the view, so this only runs in the browser.
   // --------------------------------------------------------------------------
   const lookContainer = document.getElementById("scene-container") as HTMLDivElement;
-  const LOOK_BUTTON = 2; // right mouse button
+  // Either mouse button drags to look. LEFT works too (kids on Chromebooks find
+  // right-drag unusual) — a plain click still clicks a panel button, since a
+  // click barely moves the pointer, so the view does not visibly rotate.
+  const isLookButton = (b: number) => b === 0 || b === 2;
   let lookDragging = false;
   let lookHasLooked = false;
   let lookLastX = 0;
@@ -79,7 +89,7 @@ World.create(document.getElementById("scene-container") as HTMLDivElement, {
 
   lookContainer.addEventListener("contextmenu", function (e) { e.preventDefault(); });
   lookContainer.addEventListener("pointerdown", function (e) {
-    if (e.button !== LOOK_BUTTON) return;
+    if (!isLookButton(e.button)) return;
     lookDragging = true;
     lookHasLooked = true;
     lookLastX = e.clientX;
@@ -97,9 +107,32 @@ World.create(document.getElementById("scene-container") as HTMLDivElement, {
     lookPitch = Math.max(-LOOK_PITCH_LIMIT, Math.min(LOOK_PITCH_LIMIT, lookPitch));
   });
   window.addEventListener("pointerup", function (e) {
-    if (e.button !== LOOK_BUTTON) return;
+    if (!isLookButton(e.button)) return;
     lookDragging = false;
     lookContainer.style.cursor = "";
+  });
+
+  // A persistent controls hint at the bottom (browser only), so kids always
+  // know how to move and look, not just during the opening objective line.
+  const controlsHint = document.createElement("div");
+  controlsHint.textContent = "Move: W A S D    ·    Look: click and drag";
+  controlsHint.style.position = "fixed";
+  controlsHint.style.bottom = "14px";
+  controlsHint.style.left = "50%";
+  controlsHint.style.transform = "translateX(-50%)";
+  controlsHint.style.zIndex = "1000";
+  controlsHint.style.background = "rgba(31, 58, 95, 0.82)";
+  controlsHint.style.color = "#fffbf0";
+  controlsHint.style.fontFamily = "system-ui, sans-serif";
+  controlsHint.style.fontSize = "13px";
+  controlsHint.style.fontWeight = "700";
+  controlsHint.style.padding = "6px 14px";
+  controlsHint.style.borderRadius = "12px";
+  controlsHint.style.pointerEvents = "none";
+  document.body.appendChild(controlsHint);
+  // It only makes sense in the flat browser view; hide it inside a headset.
+  world.visibilityState.subscribe(function (state) {
+    controlsHint.style.display = state === VisibilityState.NonImmersive ? "block" : "none";
   });
 
   function browserLookLoop() {
@@ -130,7 +163,7 @@ World.create(document.getElementById("scene-container") as HTMLDivElement, {
   onScore(function (meter) {
     if (meter === "growth") setPlantGrowth(getScores().growth / 100);
   });
-  setObjective("Look around by holding the right mouse button, and walk with W A S D.");
+  setObjective("Walk with W A S D, and click and drag to look around.");
 
   // --------------------------------------------------------------------------
   // The one shared ticker, the panel manager, and the headset scoreboard.

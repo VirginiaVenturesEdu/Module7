@@ -104,6 +104,14 @@ export function setupStage2(ctx: Ctx) {
     }
     showBeat("plan");
 
+    // Inject the paycheck from the constant so the text has a single source.
+    doc.getElementById("s2-intro")?.setProperties({
+      text:
+        "You earned a $" +
+        ECON.PAYCHECK_STAGE2 +
+        " paycheck! How much do you want to invest? Investing might grow your money, but it is not a sure thing.",
+    });
+
     function setChip(el: PanelElement | null, word: string, amount: number, color: string) {
       el?.setProperties({ text: word + " - $" + amount, backgroundColor: color });
     }

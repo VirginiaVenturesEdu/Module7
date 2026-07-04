@@ -23,10 +23,10 @@
   .section-head { font-size: 3; font-weight: bold; color: #8a6118; text-align: center; letter-spacing: 2; margin-top: 4; }
   .tl { display: flex; flex-direction: column; align-items: stretch; width: 126; margin-top: 1; }
   .tl-row { display: flex; flex-direction: column; align-items: stretch; width: 126; margin-top: 2; }
-  .tl-line { font-size: 3.2; font-weight: bold; color: #1F3A5F; }
+  .tl-line { font-size: 3.6; font-weight: bold; color: #1F3A5F; }
   .tl-bar-bg { width: 126; height: 3; background-color: #e2dccb; border-radius: 1.5; margin-top: 1; }
   .tl-fill { height: 3; background-color: #5fae4a; border-radius: 1.5; }
-  .tl-choice { font-size: 2.8; color: #8a6118; margin-top: 1; }
+  .tl-choice { font-size: 3.2; color: #8a6118; margin-top: 1; }
   .next-button { display: flex; align-items: center; justify-content: center; margin-top: 5; padding-top: 3; padding-bottom: 3; padding-left: 9; padding-right: 9; background-color: #c8962a; border-radius: 4; cursor: pointer; }
   .next-label { font-size: 4.4; font-weight: bold; color: #1F3A5F; word-break: keep-all; }
   .debrief-intro { font-size: 3.8; font-weight: bold; color: #1F3A5F; text-align: center; margin-top: 2; }
