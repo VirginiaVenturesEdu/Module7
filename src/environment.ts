@@ -267,8 +267,7 @@ function buildStreet(world: any) {
   nwE.object3D!.rotation.x = -Math.PI / 2;
   nwE.object3D!.position.set(0, 0.025, -2.8);
 
-  // A "Main Street" banner across the middle, facing you. Its spot is exported
-  // (MAIN_STREET_SIGN) because the VR scoreboard parks itself above the board.
+  // A "Main Street" banner across the middle, facing you.
   const banner = new Group();
   for (const sx of [-6, 6]) {
     const post = meshCyl(0.16, 0.18, 4.3, PALETTE.woodDark, 10);
@@ -284,15 +283,10 @@ function buildStreet(world: any) {
   board.position.set(0, 4.15, 0.3);
   banner.add(board);
   const bannerE = world.createTransformEntity(banner);
-  bannerE.object3D!.position.set(MAIN_STREET_SIGN.x, 0, MAIN_STREET_SIGN.z);
+  bannerE.object3D!.position.set(0, 0, -8.0);
 
   return ground;
 }
-
-// Where the "Main Street" banner stands, and the top edge of its sign board
-// (board center y 4.15 + half its 0.95 height). The VR scoreboard (game/
-// scoreboard.ts) parks itself just above this so it reads as part of the sign.
-export const MAIN_STREET_SIGN = { x: 0, z: -8.0, topY: 4.63 };
 
 // ----------------------------------------------------------------------------
 // THE FOUR BUILDINGS  —  each is a Group of shapes, then one world object.

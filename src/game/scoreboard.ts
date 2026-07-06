@@ -2,17 +2,17 @@
 // scoreboard.ts  —  the headset dashboard.
 // The top-left HUD is a DOM overlay, which a headset cannot render, so this
 // mirrors the money + three meters onto a uikit panel (ui/scoreboard) mounted
-// at a FIXED world spot: billboard-sized above the "Main Street" banner. A
-// head-locked HUD that follows every head turn causes motion sickness, so
-// like the fixed desktop HUD this one never moves — it is simply part of the
-// street. It reads live values from the state module, pushes them on change
-// (and once per tick), and is hidden in the browser where the DOM HUD already
-// covers things.
+// at a FIXED world spot: a menu board standing beside Gus's cart, the one
+// place the player returns to every stage. A head-locked HUD that follows
+// every head turn causes motion sickness, so like the fixed desktop HUD this
+// one never moves — it is simply part of the street. It reads live values
+// from the state module, pushes them on change (and once per tick), and is
+// hidden in the browser where the DOM HUD already covers things.
 // ============================================================================
 
 import { PanelUI, VisibilityState } from "@iwsdk/core";
 import type { World } from "@iwsdk/core";
-import { MAIN_STREET_SIGN } from "../environment";
+import { GUS_SPOT } from "../environment";
 import { getMoney, getObjective, getScores, onMoney, onObjective, onScore } from "./state";
 import type { PanelManager } from "./panels";
 import type { PanelDoc, PanelElement } from "./types";
@@ -100,22 +100,19 @@ export function initScoreboard(world: World, panels: PanelManager, ticker: Ticke
     panel.object3D!.visible = state !== VisibilityState.NonImmersive;
   });
 
-  // Mount it once, permanently, above the "Main Street" sign board — a fixed
-  // landmark that never follows the head. Scaled up to billboard size so it
-  // reads from street level (the panel itself is ~0.8m wide), and pitched a
-  // few degrees down toward the players below it (panel front is +Z, which
-  // already faces the street).
-  const SB_SCALE = 4; // ~3.2m wide, a touch narrower than the 4.2m sign board
-  const SB_TILT = 0.28; // rad; nod the face down toward eye level on the street
-  const SB_HALF_HEIGHT = (0.85 * SB_SCALE) / 2; // panel is roughly 0.85m tall
+  // Mount it once, permanently, beside Gus's cart — the mentor's menu board.
+  // It stands to the cart's left (clear of the cart, Gus's question panel at
+  // z + 1.5, and the tree at x -12), centered at eye height, and yawed so its
+  // face (+Z) splits the difference between the street you approach from and
+  // the spot right in front of the cart where you stand to talk to Gus.
+  // Doubled in size so it stays readable from a few meters out (the panel is
+  // ~0.8m wide at scale 1).
+  const SB_SCALE = 2;
+  const SB_YAW = 0.9; // rad; swing the face toward the street center
   {
     const o3d = panel.object3D!;
-    o3d.position.set(
-      MAIN_STREET_SIGN.x,
-      MAIN_STREET_SIGN.topY + 0.15 + SB_HALF_HEIGHT, // clear the board's top edge
-      MAIN_STREET_SIGN.z + 0.3, // in front of the beam, in line with the board
-    );
-    o3d.rotation.x = SB_TILT;
+    o3d.position.set(GUS_SPOT.x - 2.2, 1.7, GUS_SPOT.z - 0.3);
+    o3d.rotation.y = SB_YAW;
     o3d.scale.setScalar(SB_SCALE);
   }
 
